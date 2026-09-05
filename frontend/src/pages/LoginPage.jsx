@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldAlert, ArrowRight, Lock, Mail, Loader2, Sparkles } from 'lucide-react';
+import { ArrowRight, Lock, Mail, Loader2 } from 'lucide-react';
 
 export const LoginPage = ({ onSwitchToRegister }) => {
   const { login } = useAuth();
@@ -23,25 +23,24 @@ export const LoginPage = ({ onSwitchToRegister }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#0B0F19] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#f4f1eb] relative overflow-hidden">
       {/* Background Glow Highlights */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ backgroundImage: 'linear-gradient(#d9e0e6 1px, transparent 1px), linear-gradient(90deg, #d9e0e6 1px, transparent 1px)', backgroundSize: '42px 42px' }}></div>
 
       <div className="w-full max-w-md space-y-6 relative z-10">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-sky-600 to-teal-400 shadow-xl shadow-sky-500/20 mb-2">
-            <ShieldAlert className="w-8 h-8 text-white" />
+          <div className="inline-flex p-1 rounded-lg bg-[#102A43] shadow-xl shadow-slate-900/10 mb-2">
+            <img src="/findocai-mark.svg" alt="FinDocAI logo" className="w-20 h-20 rounded" />
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">FinDocAI Platform</h2>
-          <p className="text-sm text-slate-400">AI-Powered Financial Intelligence & Risk Assessment</p>
+          <h2 className="text-3xl font-bold text-[#183247] tracking-tight">FinDocAI Audit Workspace</h2>
+          <p className="text-sm text-slate-400">Controlled evidence review for financial assurance teams</p>
         </div>
 
         {/* Login Box */}
-        <div className="glass-card p-8 rounded-3xl border border-slate-800 space-y-6 shadow-2xl">
+        <div className="glass-card p-8 rounded-lg border border-slate-800 space-y-6 shadow-2xl">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-white">Sign In to Dashboard</h3>
+            <h3 className="text-lg font-semibold text-[#183247]">Sign in to the engagement</h3>
             <p className="text-xs text-slate-400">Enter your analyst or business user credentials</p>
           </div>
 
@@ -64,7 +63,7 @@ export const LoginPage = ({ onSwitchToRegister }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="analyst@findoc.ai"
-                  className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition"
+                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
                 />
               </div>
             </div>
@@ -81,7 +80,7 @@ export const LoginPage = ({ onSwitchToRegister }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition"
+                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
                 />
               </div>
             </div>
@@ -89,7 +88,7 @@ export const LoginPage = ({ onSwitchToRegister }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-sky-600 to-teal-500 hover:from-sky-500 hover:to-teal-400 text-white font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-sky-600/25 active:scale-[0.99] disabled:opacity-50 mt-2"
+              className="w-full flex items-center justify-center gap-2 bg-[#183247] hover:bg-[#24465e] text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg shadow-slate-900/10 active:scale-[0.99] disabled:opacity-50 mt-2"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
               {loading ? 'Authenticating...' : 'Access FinDocAI'}

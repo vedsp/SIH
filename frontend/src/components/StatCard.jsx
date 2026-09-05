@@ -2,21 +2,21 @@ import React from 'react';
 
 export const StatCard = ({ title, value, icon: Icon, color = 'sky', subtext, trend }) => {
   const colorMap = {
-    sky: 'from-sky-500/20 to-blue-600/10 border-sky-500/30 text-sky-400',
-    teal: 'from-teal-500/20 to-emerald-600/10 border-teal-500/30 text-teal-400',
-    rose: 'from-rose-500/20 to-pink-600/10 border-rose-500/30 text-rose-400',
-    amber: 'from-amber-500/20 to-orange-600/10 border-amber-500/30 text-amber-400',
-    purple: 'from-purple-500/20 to-indigo-600/10 border-purple-500/30 text-purple-400',
+    sky: 'border-[#c5d8e1] text-[#24536b]',
+    teal: 'border-[#bfd9d1] text-[#276b5b]',
+    rose: 'border-[#e4c9c4] text-[#a04e42]',
+    amber: 'border-[#e6d3b2] text-[#a56316]',
+    purple: 'border-[#d3cde0] text-[#625079]',
   };
 
   const currentTheme = colorMap[color] || colorMap.sky;
 
   return (
-    <div className={`glass-card p-5 rounded-2xl border bg-gradient-to-br ${currentTheme} relative overflow-hidden transition-all duration-200 hover:scale-[1.01]`}>
+    <div className={`glass-card p-5 rounded-lg border ${currentTheme} relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5`}>
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-slate-400 tracking-wider uppercase">{title}</span>
         {Icon && (
-          <div className="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+          <div className="p-2 rounded-lg bg-[#f3f6f7] border border-slate-800">
             <Icon className="w-5 h-5" />
           </div>
         )}

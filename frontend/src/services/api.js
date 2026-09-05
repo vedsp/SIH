@@ -72,5 +72,6 @@ export const documentApi = {
 };
 
 export const demoApi = {
-  seedDemo: () => apiFetch('/demo/seed', { method: 'POST' })
+  seedDemo: () => apiFetch('/demo/seed', { method: 'POST' }),
+  unloadDemo: () => apiFetch('/demo', { method: 'DELETE' })
 };

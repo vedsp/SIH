@@ -8,6 +8,7 @@ from app.models.models import (
 from app.schemas.schemas import MessageResponse
 from app.api.deps import get_current_user
 import json
+import os
 
 router = APIRouter(prefix="/demo", tags=["demo"])
 
@@ -206,3 +207,25 @@ def seed_demo_data(
     db.commit()
 
     return MessageResponse(message="Demo dataset for ABC Manufacturing Pvt Ltd seeded successfully!")
+
+@router.delete("", response_model=MessageResponse)
+def unload_demo_data(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    demo_documents = db.query(Document).filter(
+        Document.user_id == current_user.id,
+        Document.filename.like("demo_%")
+    ).all()
+
+    for document in demo_documents:
+        if os.path.exists(document.storage_path):
+            try:
+                os.remove(document.storage_path)
+            except OSError:
+                pass
+        db.delete(document)
+
+    db.query(RiskAssessment).filter(RiskAssessment.user_id == current_user.id).delete(synchronize_session=False)
+    db.commit()
+    return MessageResponse(message="Demo dataset unloaded successfully!", status="success")

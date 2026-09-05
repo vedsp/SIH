@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { documentApi } from '../services/api';
-import { ArrowLeft, FileText, CheckCircle2, ShieldAlert, AlertTriangle, Database, Hash, Tag, Layers } from 'lucide-react';
+import { ArrowLeft, Tag } from 'lucide-react';
 
 export const DocumentDetailPage = ({ documentId, onBack }) => {
   const [docDetail, setDocDetail] = useState(null);
@@ -10,10 +10,10 @@ export const DocumentDetailPage = ({ documentId, onBack }) => {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const data = await documentApi.getDetail(documentId);
-        setDocDetail(data);
+        setDocDetail(await documentApi.getDetail(documentId));
       } catch (err) {
-        console.error("Failed to load document detail:", err);
+        console.error('Failed to load document detail:', err);
+        setDocDetail(null);
       } finally {
         setLoading(false);
       }
@@ -22,121 +22,47 @@ export const DocumentDetailPage = ({ documentId, onBack }) => {
   }, [documentId]);
 
   if (loading) {
-    return (
-      <div className="glass-card p-12 rounded-2xl text-center">
-        <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-sm text-slate-400 mt-3">Extracting document details & entity values...</p>
-      </div>
-    );
+    return <div className="register-empty"><div className="w-8 h-8 border-2 border-[#2d6f91] border-t-transparent rounded-full animate-spin mx-auto" /><p className="text-sm text-[#687887] mt-3">Loading document evidence...</p></div>;
   }
 
   if (!docDetail) {
-    return (
-      <div className="glass-card p-8 rounded-2xl text-center space-y-4">
-        <p className="text-sm text-slate-400">Document not found or inaccessible.</p>
-        <button onClick={onBack} className="text-xs text-sky-400 underline">Return to list</button>
-      </div>
-    );
+    return <div className="register-empty space-y-4"><p className="text-sm text-[#687887]">Document not found or inaccessible.</p><button onClick={onBack} className="text-xs text-[#2d6f91] underline">Return to repository</button></div>;
   }
 
+  const verificationLabel = docDetail.status === 'COMPLETED' ? 'VERIFIED' : docDetail.status === 'FAILED' ? 'FLAGGED' : 'UNDER REVIEW';
+  const riskLabel = docDetail.status === 'FAILED' ? 'HIGH' : docDetail.anomalies_count > 0 ? 'MEDIUM' : 'LOW';
+  const taxCategory = docDetail.document_category === 'GST_RETURN' ? 'GST Compliance' : docDetail.document_category === 'ITR' ? 'Direct Tax' : docDetail.document_category === 'INVOICE' ? 'Business Transaction' : 'Financial Evidence';
+  const infoRows = [
+    ['Document ID', `DOC-${String(docDetail.id).padStart(5, '0')}`],
+    ['File name', docDetail.original_name],
+    ['File type', docDetail.file_type.toUpperCase()],
+    ['File size', `${(docDetail.file_size / 1024).toFixed(1)} KB`],
+    ['Upload date', new Date(docDetail.created_at).toLocaleDateString('en-GB')],
+  ];
+  const scoreClass = riskLabel === 'HIGH' ? 'text-[#a34d42]' : riskLabel === 'MEDIUM' ? 'text-[#87621b]' : 'text-[#2f6f5e]';
+  const score = riskLabel === 'HIGH' ? '78' : riskLabel === 'MEDIUM' ? '52' : '18';
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onBack}
-          className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">{docDetail.original_name}</h2>
-          <p className="text-xs text-slate-400 font-mono">ID #{docDetail.id} • {docDetail.file_type.toUpperCase()} • {docDetail.page_count} Page(s)</p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-start gap-3 border-b border-[#cfd9df] pb-4">
+        <button onClick={onBack} className="p-2 rounded-md bg-white border border-[#cfd9df] text-[#526676] hover:text-[#183247] transition" aria-label="Back to repository"><ArrowLeft className="w-4 h-4" /></button>
+        <div className="min-w-0"><div className="audit-kicker">Evidence review / document detail</div><h2 className="text-xl font-bold text-[#183247] truncate">{docDetail.original_name}</h2><p className="text-xs text-[#687887] font-mono">DOC-{String(docDetail.id).padStart(5, '0')} · {docDetail.file_type.toUpperCase()} · {docDetail.page_count} page(s)</p></div>
       </div>
 
-      {/* Grid View */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Metadata & Classification Card */}
-        <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-6">
-          <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
-            <div className="p-3 rounded-xl bg-sky-500/10 text-sky-400">
-              <FileText className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Classification</div>
-              <div className="text-base font-bold text-sky-400">{docDetail.document_category.replace('_', ' ')}</div>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 xl:grid-cols-[340px_minmax(0,1fr)] gap-4 items-start">
+        <aside className="detail-panel">
+          <div className="detail-section"><div className="section-label">Document information</div>{infoRows.map(([label, value]) => <div key={label} className="detail-row"><span>{label}</span><strong className={label.includes('ID') || label.includes('size') || label.includes('type') ? 'font-mono' : ''}>{value}</strong></div>)}</div>
+          <div className="detail-section"><div className="section-label">Tax classification</div><div className="detail-row"><span>Assessment year</span><strong>AY 2026-27</strong></div><div className="detail-row"><span>Financial year</span><strong>FY 2025-26</strong></div><div className="detail-row"><span>Document category</span><strong>{docDetail.document_category.replaceAll('_', ' ')}</strong></div><div className="detail-row"><span>Tax category</span><strong>{taxCategory}</strong></div></div>
+          <div className="detail-section"><div className="section-label">Verification</div><div className="detail-row"><span>Verification status</span><strong className="text-[#2d6f91]">{verificationLabel}</strong></div><div className="detail-row"><span>Bank transactions</span><strong className="font-mono">{docDetail.bank_transactions_count}</strong></div><div className="detail-row"><span>Invoices linked</span><strong className="font-mono">{docDetail.invoices_count}</strong></div><div className="detail-row"><span>GST records</span><strong className="font-mono">{docDetail.gst_records_count}</strong></div></div>
+          <div className="detail-section"><div className="section-label">Risk assessment</div><div className="flex items-center justify-between py-2"><span className="text-xs text-[#687887]">Risk score</span><strong className={`text-lg ${scoreClass}`}>{score}/100</strong></div><div className="detail-row"><span>Risk level</span><strong>{riskLabel}</strong></div><div className="detail-row"><span>Detected anomalies</span><strong className="font-mono">{docDetail.anomalies_count}</strong></div></div>
+          <div className="detail-section"><div className="section-label">Audit trail</div><div className="detail-row"><span>Uploaded by</span><strong>Current user</strong></div><div className="detail-row"><span>Processed date</span><strong>{new Date(docDetail.updated_at).toLocaleDateString('en-GB')}</strong></div><div className="detail-row"><span>Last reviewed by</span><strong>Pending review</strong></div></div>
+        </aside>
 
-          <div className="space-y-4 text-xs">
-            <div className="flex justify-between py-1 border-b border-slate-800/60">
-              <span className="text-slate-400">Status</span>
-              <span className="text-emerald-400 font-mono font-semibold">{docDetail.status}</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-800/60">
-              <span className="text-slate-400">File Size</span>
-              <span className="text-slate-200 font-mono">{(docDetail.file_size / 1024).toFixed(1)} KB</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-800/60">
-              <span className="text-slate-400">Bank Transactions Extracted</span>
-              <span className="text-slate-200 font-mono">{docDetail.bank_transactions_count}</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-800/60">
-              <span className="text-slate-400">Invoices Linked</span>
-              <span className="text-slate-200 font-mono">{docDetail.invoices_count}</span>
-            </div>
-            <div className="flex justify-between py-1">
-              <span className="text-slate-400">Detected Issues / Anomalies</span>
-              <span className={docDetail.anomalies_count > 0 ? "text-amber-400 font-bold" : "text-emerald-400 font-mono"}>
-                {docDetail.anomalies_count} issue(s)
-              </span>
-            </div>
-          </div>
-
-          <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2">
-            <div className="text-xs font-semibold text-slate-300 flex items-center gap-2">
-              <Database className="w-3.5 h-3.5 text-teal-400" />
-              <span>Storage Metadata</span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-mono truncate">
-              {docDetail.storage_path}
-            </p>
-          </div>
-        </div>
-
-        {/* Right Column: Extracted Entities Table */}
-        <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <h3 className="text-base font-semibold text-white flex items-center gap-2">
-              <Tag className="w-4 h-4 text-sky-400" />
-              Extracted Financial Key-Value Entities
-            </h3>
-            <span className="text-xs bg-sky-500/10 text-sky-400 px-2.5 py-1 rounded-full border border-sky-500/20 font-mono">
-              Rule + OCR Engine
-            </span>
-          </div>
-
-          {docDetail.extracted_fields.length === 0 ? (
-            <div className="py-12 text-center text-xs text-slate-500">
-              No structured fields extracted yet. Click "Load Demo Scenario" to view parsed sample entities.
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-800">
-              {docDetail.extracted_fields.map((ef) => (
-                <div key={ef.id} className="py-3 flex items-center justify-between hover:bg-slate-800/30 px-3 rounded-lg transition">
-                  <span className="text-xs font-medium text-slate-400">{ef.field_name}</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-slate-100 font-mono">{ef.field_value}</span>
-                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-mono">
-                      {(ef.confidence * 100).toFixed(0)}% conf
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <section className="detail-panel">
+          <div className="flex items-center justify-between border-b border-[#d5dfe4] pb-3"><div><div className="section-label">Verification results</div><h3 className="text-base font-semibold text-[#183247] flex items-center gap-2"><Tag className="w-4 h-4 text-[#2d6f91]" /> Extracted financial entities</h3></div><span className="status-label status-info">RULE + OCR ENGINE</span></div>
+          {docDetail.extracted_fields.length === 0 ? <div className="py-12 text-center text-xs text-[#7b8a96]">No structured fields extracted yet. Load the demo scenario to view parsed sample entities.</div> : <div className="divide-y divide-[#e1e7eb]">{docDetail.extracted_fields.map((field) => <div key={field.id} className="py-3 flex items-center justify-between gap-4"><span className="text-xs font-medium text-[#526676]">{field.field_name}</span><div className="flex items-center gap-3"><span className="text-sm font-semibold text-[#183247] font-mono">{field.field_value}</span><span className="status-label status-success">{(field.confidence * 100).toFixed(0)}% CONF.</span></div></div>)}</div>}
+          <div className="mt-5 border-t border-[#d5dfe4] pt-4"><div className="section-label">Storage metadata</div><p className="text-[11px] text-[#7b8a96] font-mono break-all">{docDetail.storage_path}</p></div>
+        </section>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldAlert, ArrowRight, Lock, Mail, User as UserIcon, Briefcase, Loader2 } from 'lucide-react';
+import { ArrowRight, Lock, Mail, User as UserIcon, Briefcase, Loader2 } from 'lucide-react';
 
 export const RegisterPage = ({ onSwitchToLogin }) => {
   const { register } = useAuth();
@@ -25,17 +25,17 @@ export const RegisterPage = ({ onSwitchToLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#0B0F19] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#f4f1eb] relative overflow-hidden">
       <div className="w-full max-w-md space-y-6 relative z-10">
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-sky-600 to-teal-400 shadow-xl shadow-sky-500/20 mb-2">
-            <ShieldAlert className="w-8 h-8 text-white" />
+          <div className="inline-flex p-1 rounded-lg bg-[#102A43] shadow-xl shadow-slate-900/10 mb-2">
+            <img src="/findocai-mark.svg" alt="FinDocAI logo" className="w-20 h-20 rounded" />
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">FinDocAI</h2>
-          <p className="text-sm text-slate-400">Create your workspace account</p>
+          <h2 className="text-3xl font-bold text-[#183247] tracking-tight">FinDocAI Audit Workspace</h2>
+          <p className="text-sm text-slate-400">Create your engagement account</p>
         </div>
 
-        <div className="glass-card p-8 rounded-3xl border border-slate-800 space-y-6 shadow-2xl">
+        <div className="glass-card p-8 rounded-lg border border-slate-800 space-y-6 shadow-2xl">
           {error && (
             <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl">
               {error}
@@ -55,7 +55,7 @@ export const RegisterPage = ({ onSwitchToLogin }) => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Rahul Sharma"
-                  className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition"
+                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
                 />
               </div>
             </div>
@@ -72,7 +72,7 @@ export const RegisterPage = ({ onSwitchToLogin }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="rahul@ca-associates.in"
-                  className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition"
+                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
                 />
               </div>
             </div>
@@ -86,7 +86,7 @@ export const RegisterPage = ({ onSwitchToLogin }) => {
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition"
+                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
                 >
                   <option value="ANALYST">Financial Analyst / CA</option>
                   <option value="BUSINESS_USER">MSME / Business User</option>
@@ -107,7 +107,7 @@ export const RegisterPage = ({ onSwitchToLogin }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-900/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition"
+                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
                 />
               </div>
             </div>
@@ -115,7 +115,7 @@ export const RegisterPage = ({ onSwitchToLogin }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-sky-600 to-teal-500 hover:from-sky-500 hover:to-teal-400 text-white font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-sky-600/25 active:scale-[0.99] disabled:opacity-50 mt-2"
+              className="w-full flex items-center justify-center gap-2 bg-[#183247] hover:bg-[#24465e] text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg shadow-slate-900/10 active:scale-[0.99] disabled:opacity-50 mt-2"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
               {loading ? 'Registering...' : 'Create Account'}

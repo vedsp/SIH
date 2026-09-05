@@ -19,12 +19,13 @@ const AppContent = () => {
   const [authMode, setAuthMode] = useState('login'); // login or register
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedDocId, setSelectedDocId] = useState(null);
+  const [documentCategory, setDocumentCategory] = useState('');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center">
+        <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="w-10 h-10 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-xs text-slate-400 font-mono">Initializing FinDocAI Environment...</p>
@@ -55,8 +56,8 @@ const AppContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] flex flex-col font-sans">
-      <Navbar onDemoLoaded={handleDemoLoaded} />
+    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col font-sans">
+      <Navbar onDemoLoaded={handleDemoLoaded} refreshTrigger={refreshTrigger} />
 
       <div className="flex flex-1">
         <Sidebar
@@ -66,6 +67,7 @@ const AppContent = () => {
             if (tab !== 'document_detail') setSelectedDocId(null);
           }}
           onOpenUpload={() => setIsUploadOpen(true)}
+          onSelectCategory={(category) => setDocumentCategory(category)}
         />
 
         <main className="flex-1 p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
@@ -75,6 +77,7 @@ const AppContent = () => {
               onOpenUpload={() => setIsUploadOpen(true)}
               onViewDetail={handleViewDetail}
               refreshTrigger={refreshTrigger}
+              initialCategory={documentCategory}
             />
           )}
 
@@ -83,6 +86,7 @@ const AppContent = () => {
               onOpenUpload={() => setIsUploadOpen(true)}
               onViewDetail={handleViewDetail}
               refreshTrigger={refreshTrigger}
+              initialCategory={documentCategory}
             />
           )}
 

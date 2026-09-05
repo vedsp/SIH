@@ -31,9 +31,10 @@ export const DashboardPage = ({ onNavigate, onOpenUpload, onViewDetail, refreshT
   return (
     <div className="space-y-6">
       {/* Top Banner / Welcome */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-6 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-[#111827] to-slate-900">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-6 rounded-lg border border-slate-800">
         <div className="space-y-1">
-          <h2 className="text-xl font-bold text-white tracking-tight">Executive Financial Dashboard</h2>
+          <div className="audit-kicker">Engagement overview / FY 2026</div>
+          <h2 className="text-xl font-bold text-white tracking-tight">Executive financial dashboard</h2>
           <p className="text-xs text-slate-400">
             Real-time cross-document intelligence, cash flow summary & potential risk alerts
           </p>
@@ -41,14 +42,14 @@ export const DashboardPage = ({ onNavigate, onOpenUpload, onViewDetail, refreshT
         <div className="flex items-center gap-3">
           <button
             onClick={fetchOverview}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+            className="p-2 rounded-lg bg-[#f3f6f7] hover:bg-[#e5ecef] text-slate-300 transition border border-slate-800"
             title="Refresh Metrics"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={onOpenUpload}
-            className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-lg shadow-sky-600/20"
+            className="bg-[#183247] hover:bg-[#24465e] text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow-lg shadow-slate-900/10"
           >
             + Upload New Document
           </button>
@@ -57,10 +58,10 @@ export const DashboardPage = ({ onNavigate, onOpenUpload, onViewDetail, refreshT
 
       {/* Risk Alert Banner if anomalies detected */}
       {overview && overview.active_alerts_count > 0 && (
-        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl flex items-start gap-3">
+        <div className="bg-[#fff8e9] border border-[#e8cf9f] p-4 rounded-lg flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1 text-xs">
-            <div className="font-semibold text-amber-300 text-sm">Potential Inconsistency & Anomaly Alerts Detected</div>
+            <div className="font-semibold text-[#8a5a0a] text-sm">Exceptions require reviewer attention</div>
             <p className="text-slate-300 mt-1 leading-relaxed">
               System identified cross-document discrepancies (e.g. Bank credits vs GST turnover variance) and unusual transaction amounts requiring human review.
             </p>
@@ -127,7 +128,7 @@ export const DashboardPage = ({ onNavigate, onOpenUpload, onViewDetail, refreshT
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-white flex items-center gap-2">
             <Layers className="w-4 h-4 text-sky-400" />
-            Recent Document Feed
+            Recent evidence activity
           </h3>
           <button
             onClick={() => onNavigate('documents')}
