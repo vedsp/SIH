@@ -24,21 +24,16 @@ export const LoginPage = ({ onSwitchToRegister }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f6f8]">
-      {/* Official Top Government Bar */}
+      {/* Application Header */}
       <header className="portal-header py-2.5 px-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-[2px] bg-white text-[#0b3861] font-bold flex items-center justify-center text-sm">
-            IT
-          </div>
           <div>
-            <h1 className="text-sm font-bold tracking-wide uppercase">Income Tax Department · Statutory Audit Portal</h1>
-            <p className="text-[11px] text-[#cfd9df]">FinDocAI Central Assessment & Evidence Processing Engine</p>
+            <h1 className="text-sm font-bold tracking-wide uppercase">FinDocAI</h1>
+            <p className="text-[11px] text-[#cfd9df]">Financial Document Audit & Reconciliation</p>
           </div>
         </div>
         <div className="hidden md:flex items-center gap-4 text-[11px] text-[#cfd9df]">
-          <span>CBDT Schema v2026.1</span>
-          <span>|</span>
-          <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-[#f2a900]" /> Secure Portal</span>
+          <span className="flex items-center gap-1">Encrypted · Private workspace</span>
         </div>
       </header>
 
@@ -48,10 +43,10 @@ export const LoginPage = ({ onSwitchToRegister }) => {
           <div className="bg-white border border-[#cccccc]">
             <div className="bg-[#f2f4f7] px-4 py-2.5 border-b border-[#cccccc]">
               <h2 className="text-xs font-bold text-[#222222] uppercase tracking-wide">
-                Tax Assessee / Auditor Login
+                Sign in to FinDocAI
               </h2>
               <p className="text-[11px] text-[#555555]">
-                Enter registered user ID (Email) and password to access ITR dossiers
+                Enter your credentials to access your audit workspace
               </p>
             </div>
 
@@ -118,7 +113,7 @@ export const LoginPage = ({ onSwitchToRegister }) => {
 
           {/* Demonstration Notice */}
           <div className="bg-[#e9edf2] border border-[#cccccc] p-2.5 text-center text-[11px] text-[#444444]">
-            <strong>Hackathon Assessment Mode:</strong> Pre-filled default auditor account enabled.
+            <strong>Demo account enabled:</strong> Pre-filled credentials provided.
           </div>
         </div>
       </div>

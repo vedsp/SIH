@@ -26,21 +26,16 @@ export const RegisterPage = ({ onSwitchToLogin }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f6f8]">
-      {/* Official Top Government Bar */}
+      {/* Application Header */}
       <header className="portal-header py-2.5 px-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-[2px] bg-white text-[#0b3861] font-bold flex items-center justify-center text-sm">
-            IT
-          </div>
           <div>
-            <h1 className="text-sm font-bold tracking-wide uppercase">Income Tax Department · Statutory Audit Portal</h1>
-            <p className="text-[11px] text-[#cfd9df]">Assessee / Auditor Profile Registration</p>
+            <h1 className="text-sm font-bold tracking-wide uppercase">FinDocAI</h1>
+            <p className="text-[11px] text-[#cfd9df]">Financial Document Audit & Reconciliation</p>
           </div>
         </div>
         <div className="hidden md:flex items-center gap-4 text-[11px] text-[#cfd9df]">
-          <span>CBDT Schema v2026.1</span>
-          <span>|</span>
-          <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-[#f2a900]" /> Secure Portal</span>
+          <span className="flex items-center gap-1">Encrypted · Private workspace</span>
         </div>
       </header>
 
