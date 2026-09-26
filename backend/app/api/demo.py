@@ -7,8 +7,24 @@ from app.models.models import (
 )
 from app.schemas.schemas import MessageResponse
 from app.api.deps import get_current_user
+from app.core import storage
 import json
 import os
+from io import BytesIO
+from reportlab.pdfgen import canvas
+
+def _generate_dummy_pdf(title: str, text_content: str) -> bytes:
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer)
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(100, 750, title)
+    c.setFont("Helvetica", 12)
+    c.drawString(100, 700, text_content)
+    c.drawString(100, 680, "This is a system-generated dummy document for testing.")
+    c.save()
+    return buffer.getvalue()
+
+
 
 router = APIRouter(prefix="/demo", tags=["demo"])
 
@@ -27,16 +43,19 @@ def seed_demo_data(
     - Duplicate Invoice: INV-1032 vs INV-1032-DUP
     """
     # 1. Create Bank Statement Document
+    bank_pdf_bytes = _generate_dummy_pdf("HDFC Bank Statement", "ABC Manufacturing Pvt Ltd - 2025/2026")
+    bank_path = storage.upload_file(bank_pdf_bytes, "demo_bank_statement_2025_2026.pdf")
+    
     bank_doc = Document(
         user_id=current_user.id,
         filename="demo_bank_statement_2025_2026.pdf",
         original_name="HDFC_Bank_Statement_ABC_Mfg.pdf",
         file_type="pdf",
-        file_size=412850,
+        file_size=len(bank_pdf_bytes),
         document_category=DocumentCategory.BANK_STATEMENT.value,
         status=DocumentStatus.COMPLETED.value,
-        page_count=4,
-        storage_path="./storage/demo_bank_statement.pdf"
+        page_count=1,
+        storage_path=bank_path
     )
     db.add(bank_doc)
     db.commit()
@@ -61,16 +80,19 @@ def seed_demo_data(
     db.add_all(transactions)
 
     # 2. Create GST Return Document
+    gst_pdf_bytes = _generate_dummy_pdf("GSTR3B Filing", "27AABC1234F1Z5 - Q4 2025")
+    gst_path = storage.upload_file(gst_pdf_bytes, "demo_gstr3b_q4_2025.pdf")
+
     gst_doc = Document(
         user_id=current_user.id,
         filename="demo_gstr3b_q4_2025.pdf",
         original_name="GSTR3B_Filing_27AABC1234F1Z5.pdf",
         file_type="pdf",
-        file_size=289120,
+        file_size=len(gst_pdf_bytes),
         document_category=DocumentCategory.GST_RETURN.value,
         status=DocumentStatus.COMPLETED.value,
-        page_count=3,
-        storage_path="./storage/demo_gst_return.pdf"
+        page_count=1,
+        storage_path=gst_path
     )
     db.add(gst_doc)
     db.commit()
@@ -89,16 +111,19 @@ def seed_demo_data(
     ))
 
     # 3. Create Invoice Documents
+    inv_pdf_bytes = _generate_dummy_pdf("Invoice INV-1032", "Vendor: XYZ Traders | Amount: ₹9,67,600")
+    inv1_path = storage.upload_file(inv_pdf_bytes, "demo_invoice_inv1032.pdf")
+
     inv_doc1 = Document(
         user_id=current_user.id,
         filename="demo_invoice_inv1032.pdf",
         original_name="Invoice_INV-1032_XYZTraders.pdf",
         file_type="pdf",
-        file_size=195000,
+        file_size=len(inv_pdf_bytes),
         document_category=DocumentCategory.INVOICE.value,
         status=DocumentStatus.COMPLETED.value,
         page_count=1,
-        storage_path="./storage/demo_invoice1.pdf"
+        storage_path=inv1_path
     )
     db.add(inv_doc1)
     db.commit()
@@ -119,16 +144,18 @@ def seed_demo_data(
     db.add(inv1)
     db.commit()
 
+    inv2_path = storage.upload_file(inv_pdf_bytes, "demo_invoice_inv1032_dup.pdf")
+
     inv_doc2 = Document(
         user_id=current_user.id,
         filename="demo_invoice_inv1032_dup.pdf",
         original_name="Invoice_INV-1032_Duplicate_Copy.pdf",
         file_type="pdf",
-        file_size=194800,
+        file_size=len(inv_pdf_bytes),
         document_category=DocumentCategory.INVOICE.value,
         status=DocumentStatus.COMPLETED.value,
         page_count=1,
-        storage_path="./storage/demo_invoice2.pdf"
+        storage_path=inv2_path
     )
     db.add(inv_doc2)
     db.commit()
@@ -219,13 +246,12 @@ def unload_demo_data(
     ).all()
 
     for document in demo_documents:
-        if os.path.exists(document.storage_path):
-            try:
-                os.remove(document.storage_path)
-            except OSError:
-                pass
+        # Delete from storage (Supabase bucket or local disk); safe to call even for placeholder paths
+        if document.storage_path:
+            storage.delete_file(document.storage_path)
         db.delete(document)
 
     db.query(RiskAssessment).filter(RiskAssessment.user_id == current_user.id).delete(synchronize_session=False)
     db.commit()
     return MessageResponse(message="Demo dataset unloaded successfully!", status="success")
+

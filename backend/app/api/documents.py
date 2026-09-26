@@ -1,16 +1,22 @@
 import os
 import uuid
-from typing import List, Optional
+import json
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.config import settings
-from app.models.models import User, Document, DocumentStatus, DocumentCategory, DocumentPage, ExtractedField, BankTransaction, Invoice, GSTRecord, Anomaly
+from app.models.models import (
+    User, Document, DocumentStatus, DocumentCategory, DocumentPage,
+    ExtractedField, BankTransaction, Invoice, GSTRecord, Anomaly, RiskAssessment
+)
 from app.schemas.schemas import DocumentResponse, DocumentDetailResponse, DashboardOverview, MessageResponse
 from app.api.deps import get_current_user
 from app.services.document_classification import classify_text_content
+from app.core import storage
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+
 
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".csv", ".xlsx", ".xls"}
 MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB limit
@@ -40,34 +46,42 @@ async def upload_documents(
                 status_code=400,
                 detail=f"File '{filename}' exceeds maximum allowed size of 25MB."
             )
-            
-        # Save file to storage
-        unique_filename = f"{uuid.uuid4().hex}_{filename}"
-        storage_path = os.path.join(settings.STORAGE_DIR, unique_filename)
-        with open(storage_path, "wb") as f:
-            f.write(content)
-            
-        # Extract initial raw text or inspect filename for classification
+
+        # Upload to storage (Supabase bucket or local disk)
+        storage_path = storage.upload_file(content, filename)
+
+        # Extract initial raw text for classification
         extracted_text_preview = ""
         file_type = ext.replace(".", "")
+        page_count = 1
+
         if ext == ".pdf":
+            tmp_path = None
             try:
                 import fitz
-                doc = fitz.open(storage_path)
+                # Download to a temp file so fitz can open it (works for both Supabase and local)
+                tmp_path = storage.open_as_tempfile(storage_path, suffix=".pdf")
+                doc = fitz.open(tmp_path)
                 page_text_list = [page.get_text() for page in doc]
                 extracted_text_preview = " ".join(page_text_list)
                 page_count = len(doc)
+                doc.close()
             except Exception:
-                page_count = 1
                 extracted_text_preview = filename
+            finally:
+                if tmp_path and os.path.exists(tmp_path):
+                    try:
+                        os.remove(tmp_path)
+                    except OSError:
+                        pass
         else:
-            page_count = 1
             extracted_text_preview = filename
             
         # Auto-classify document type
         category = classify_text_content(extracted_text_preview, filename)
         
         # Create database record
+        unique_filename = os.path.basename(storage_path.split("?")[0])  # strip query params if any
         doc_record = Document(
             user_id=current_user.id,
             filename=unique_filename,
@@ -97,6 +111,7 @@ async def upload_documents(
         uploaded_docs.append(DocumentResponse.model_validate(doc_record))
         
     return uploaded_docs
+
 
 @router.get("/", response_model=List[DocumentResponse])
 def get_documents(
@@ -141,17 +156,93 @@ def get_dashboard_overview(
 
     recent_docs = db.query(Document).filter(Document.user_id == current_user.id).order_by(Document.created_at.desc()).limit(5).all()
 
+    # Dynamic risk assessment lookup or calculation
+    risk_record = db.query(RiskAssessment).filter(RiskAssessment.user_id == current_user.id).order_by(RiskAssessment.id.desc()).first()
+    
+    if len(user_docs) == 0:
+        calculated_risk_score = 0
+        calculated_risk_level = "NO DATA"
+    elif risk_record:
+        calculated_risk_score = risk_record.overall_score
+        calculated_risk_level = risk_record.risk_level
+    else:
+        calculated_risk_score = 72 if anomalies_count > 0 else 25
+        calculated_risk_level = "MODERATE" if anomalies_count > 0 else "LOW"
+
     return DashboardOverview(
         documents_processed=len(user_docs),
         total_revenue=round(total_rev, 2),
         total_expenses=round(total_exp, 2),
         net_cash_flow=round(total_rev - total_exp, 2),
-        risk_score=72 if anomalies_count > 0 or len(user_docs) > 0 else 15,
-        risk_level="MODERATE" if (anomalies_count > 0 or len(user_docs) > 0) else "LOW",
+        risk_score=calculated_risk_score,
+        risk_level=calculated_risk_level,
         category_counts=category_counts,
         recent_documents=[DocumentResponse.model_validate(d) for d in recent_docs],
         active_alerts_count=anomalies_count
     )
+
+@router.get("/risk/assessment")
+def get_risk_assessment(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    user_docs_count = db.query(Document).filter(Document.user_id == current_user.id).count()
+    if user_docs_count == 0:
+        return {"has_data": False, "message": "No documents uploaded yet"}
+
+    risk_record = db.query(RiskAssessment).filter(RiskAssessment.user_id == current_user.id).order_by(RiskAssessment.id.desc()).first()
+    
+    if risk_record:
+        return {
+            "has_data": True,
+            "overall_score": risk_record.overall_score,
+            "risk_level": risk_record.risk_level,
+            "positive_factors": json.loads(risk_record.positive_factors_json) if risk_record.positive_factors_json else [],
+            "risk_factors": json.loads(risk_record.risk_factors_json) if risk_record.risk_factors_json else [],
+            "breakdown": json.loads(risk_record.breakdown_json) if risk_record.breakdown_json else {}
+        }
+    else:
+        # Compute baseline score
+        anomalies_count = db.query(Anomaly).join(Document).filter(Document.user_id == current_user.id).count()
+        score = 72 if anomalies_count > 0 else 25
+        level = "MODERATE" if anomalies_count > 0 else "LOW"
+        return {
+            "has_data": True,
+            "overall_score": score,
+            "risk_level": level,
+            "positive_factors": ["Basic documentation provided"],
+            "risk_factors": ["Anomalies detected requiring review"] if anomalies_count > 0 else [],
+            "breakdown": {
+                "cash_flow_stability": 75,
+                "debt_burden": 70,
+                "revenue_consistency": 70,
+                "cross_document_consistency": 60 if anomalies_count > 0 else 90,
+                "transaction_anomalies": 50 if anomalies_count > 0 else 90,
+                "document_completeness": 80
+            }
+        }
+
+@router.get("/anomalies/list")
+def get_anomalies_list(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    anomalies = db.query(Anomaly).join(Document).filter(Document.user_id == current_user.id).order_by(Anomaly.created_at.desc()).all()
+    results = []
+    for a in anomalies:
+        results.append({
+            "id": a.id,
+            "document_id": a.document_id,
+            "document_name": a.document.original_name if a.document else "",
+            "anomaly_type": a.anomaly_type,
+            "severity": a.severity,
+            "description": a.description,
+            "explanation": a.explanation,
+            "details": json.loads(a.details_json) if a.details_json else {},
+            "created_at": a.created_at
+        })
+    return results
+
 
 @router.get("/{document_id}", response_model=DocumentDetailResponse)
 def get_document_detail(
@@ -204,13 +295,11 @@ def delete_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
         
-    # Delete file from local storage if exists
-    if os.path.exists(doc.storage_path):
-        try:
-            os.remove(doc.storage_path)
-        except Exception:
-            pass
+    # Delete file from storage (Supabase bucket or local disk)
+    if doc.storage_path:
+        storage.delete_file(doc.storage_path)
             
     db.delete(doc)
     db.commit()
     return MessageResponse(message="Document deleted successfully", status="success")
+

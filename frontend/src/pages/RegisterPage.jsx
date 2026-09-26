@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, Lock, Mail, User as UserIcon, Briefcase, Loader2 } from 'lucide-react';
+import { Loader2, Shield } from 'lucide-react';
 
 export const RegisterPage = ({ onSwitchToLogin }) => {
   const { register } = useAuth();
@@ -25,115 +25,130 @@ export const RegisterPage = ({ onSwitchToLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#f4f1eb] relative overflow-hidden">
-      <div className="w-full max-w-md space-y-6 relative z-10">
-        <div className="text-center space-y-2">
-          <div className="inline-flex p-1 rounded-lg bg-[#102A43] shadow-xl shadow-slate-900/10 mb-2">
-            <img src="/findocai-mark.svg" alt="FinDocAI logo" className="w-20 h-20 rounded" />
+    <div className="min-h-screen flex flex-col bg-[#f4f6f8]">
+      {/* Official Top Government Bar */}
+      <header className="portal-header py-2.5 px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-[2px] bg-white text-[#0b3861] font-bold flex items-center justify-center text-sm">
+            IT
           </div>
-          <h2 className="text-3xl font-bold text-[#183247] tracking-tight">FinDocAI Audit Workspace</h2>
-          <p className="text-sm text-slate-400">Create your engagement account</p>
+          <div>
+            <h1 className="text-sm font-bold tracking-wide uppercase">Income Tax Department · Statutory Audit Portal</h1>
+            <p className="text-[11px] text-[#cfd9df]">Assessee / Auditor Profile Registration</p>
+          </div>
         </div>
+        <div className="hidden md:flex items-center gap-4 text-[11px] text-[#cfd9df]">
+          <span>CBDT Schema v2026.1</span>
+          <span>|</span>
+          <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-[#f2a900]" /> Secure Portal</span>
+        </div>
+      </header>
 
-        <div className="glass-card p-8 rounded-lg border border-slate-800 space-y-6 shadow-2xl">
-          {error && (
-            <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                Full Name
-              </label>
-              <div className="relative">
-                <UserIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Rahul Sharma"
-                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
-                />
-              </div>
+      {/* Main Registration Form */}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-3">
+          <div className="bg-white border border-[#cccccc]">
+            <div className="bg-[#f2f4f7] px-4 py-2.5 border-b border-[#cccccc]">
+              <h2 className="text-xs font-bold text-[#222222] uppercase tracking-wide">
+                New User Registration (Form 1)
+              </h2>
+              <p className="text-[11px] text-[#555555]">
+                Register chartered accountant or corporate assessee credentials
+              </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="rahul@ca-associates.in"
-                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
-                />
-              </div>
-            </div>
+            <div className="p-5 space-y-4">
+              {error && (
+                <div className="p-2.5 bg-white border border-[#b91c1c] text-negative text-xs">
+                  {error}
+                </div>
+              )}
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                Select Platform Role
-              </label>
-              <div className="relative">
-                <Briefcase className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#333333] mb-1">
+                    Assessee / Auditor Full Name:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="CA Rahul Sharma"
+                    className="w-full itr-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#333333] mb-1">
+                    Registered Email ID:
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="rahul@ca-associates.in"
+                    className="w-full itr-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#333333] mb-1">
+                    Designated Portal Role:
+                  </label>
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className="w-full itr-select"
+                  >
+                    <option value="ANALYST">Statutory Auditor / CA</option>
+                    <option value="BUSINESS_USER">Corporate Assessee / MSME</option>
+                    <option value="ADMIN">Portal Officer / Admin</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#333333] mb-1">
+                    Set Portal Password:
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full itr-input"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full btn-primary py-2 text-xs"
+                  >
+                    {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                    {loading ? 'Submitting Registration...' : 'Complete User Registration'}
+                  </button>
+                </div>
+              </form>
+
+              <div className="pt-2 border-t border-[#e0e0e0] text-center text-xs text-[#555555]">
+                Already registered?{' '}
+                <button
+                  type="button"
+                  onClick={onSwitchToLogin}
+                  className="text-[#0b3861] font-semibold underline hover:text-[#082845]"
                 >
-                  <option value="ANALYST">Financial Analyst / CA</option>
-                  <option value="BUSINESS_USER">MSME / Business User</option>
-                  <option value="ADMIN">System Administrator</option>
-                </select>
+                  Sign in here
+                </button>
               </div>
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-white border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#17212b] focus:outline-none focus:border-[#b16d18] transition"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-[#183247] hover:bg-[#24465e] text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg shadow-slate-900/10 active:scale-[0.99] disabled:opacity-50 mt-2"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-              {loading ? 'Registering...' : 'Create Account'}
-            </button>
-          </form>
-
-          <div className="pt-2 text-center text-xs text-slate-400">
-            Already have an account?{' '}
-            <button
-              type="button"
-              onClick={onSwitchToLogin}
-              className="text-sky-400 font-semibold hover:underline"
-            >
-              Sign In
-            </button>
           </div>
         </div>
       </div>
     </div>
   );
 };
+

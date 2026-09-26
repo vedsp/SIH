@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { demoApi, documentApi } from '../services/api';
-import { LogOut, CheckCircle, RefreshCw, Bell, ChevronDown, Trash2 } from 'lucide-react';
+import { LogOut, RefreshCw } from 'lucide-react';
 
 const getFinancialYear = (document) => {
   const source = `${document.original_name || ''} ${document.filename || ''}`;
@@ -53,23 +53,23 @@ export const Navbar = ({ onDemoLoaded, refreshTrigger }) => {
     setDemoMessage(null);
     try {
       const res = await demoApi.seedDemo();
-      setDemoMessage("Demo dataset 'ABC Manufacturing Pvt Ltd' seeded successfully!");
+      setDemoMessage("Demo dataset 'ABC Manufacturing Pvt Ltd' loaded successfully.");
       if (onDemoLoaded) onDemoLoaded();
       setTimeout(() => setDemoMessage(null), 4000);
     } catch (err) {
-      alert("Failed to seed demo data: " + err.message);
+      alert("Failed to load demo data: " + err.message);
     } finally {
       setLoadingDemo(false);
     }
   };
 
   const handleUnloadDemo = async () => {
-    if (!window.confirm('Remove the ABC Manufacturing demo dataset?')) return;
+    if (!window.confirm('Remove the ABC Manufacturing demo records?')) return;
     setLoadingUnload(true);
     setDemoMessage(null);
     try {
       const res = await demoApi.unloadDemo();
-      setDemoMessage(res.message || 'Demo dataset unloaded successfully!');
+      setDemoMessage(res.message || 'Demo records removed.');
       if (onDemoLoaded) onDemoLoaded();
       setTimeout(() => setDemoMessage(null), 4000);
     } catch (err) {
@@ -81,95 +81,93 @@ export const Navbar = ({ onDemoLoaded, refreshTrigger }) => {
 
   return (
     <>
-    <header className="portal-chrome sticky top-0 z-30 bg-[#252925] border-b border-[#414840] px-4 md:px-6 py-2.5 flex items-center justify-between gap-6">
+    {/* Government Portal Top Header Bar */}
+    <header className="portal-header px-4 py-2 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="bg-[#343a35] p-0.5 rounded-md border border-[#59645b]">
-          <img src="/findocai-mark.svg" alt="FinDocAI logo" className="w-9 h-9 rounded" />
-        </div>
+        <img src="/logo-square.png" alt="FinDocAI logo" className="w-6 h-6 rounded-none" />
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold tracking-tight text-white">
-              FinDocAI <span className="font-normal portal-muted">/ Financial Intelligence & Tax Assessment</span>
-            </h1>
-            <span className="portal-badge text-[9px] font-semibold tracking-wider bg-[#343a35] border border-[#59645b] px-2 py-0.5 rounded uppercase">
-              SECURE AUDIT WORKSPACE
-            </span>
+          <div className="text-sm font-bold tracking-tight text-white">
+            FinDocAI <span className="font-normal text-slate-200">| Financial Audit & Tax Reconciliation Workstation</span>
           </div>
-          <p className="portal-muted text-[11px]">Digital assessment and financial evidence review</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button className="portal-muted p-2 rounded-md hover:bg-[#183b5b] hover:text-white transition" title="Notifications" aria-label="Notifications">
-          <Bell className="w-4 h-4" />
-        </button>
-
+      <div className="flex items-center gap-3 text-xs text-slate-200">
         {user && (
-          <div className="flex items-center gap-3 border-l border-[#37627e] pl-3">
-            <div className="text-right hidden sm:block">
-              <div className="text-sm font-medium text-white">{user.full_name}</div>
-              <div className="portal-badge text-[11px] font-mono tracking-wide">{user.role}</div>
-            </div>
+          <div className="flex items-center gap-3">
+            <span>Logged in as: <strong>{user.full_name}</strong> ({user.role})</span>
+            <span className="text-slate-400">|</span>
             <button
               onClick={logout}
-              className="portal-muted p-2 rounded-md hover:text-white hover:bg-[#183b5b] transition"
-              title="Sign Out"
+              className="text-white hover:underline flex items-center gap-1 cursor-pointer"
+              title="Logout from portal"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
             </button>
           </div>
         )}
       </div>
     </header>
-    <div className="portal-subnav px-4 md:px-6 py-2">
-      <div className="portal-subnav-inner">
-        <div className="portal-filter-group">
-          <div className="portal-filter-pair">
-            <label className="portal-subnav-label">Assessment year</label>
-            <div className="portal-select-wrap">
-              <select className="portal-select" value={getAssessmentYear(selectedFinancialYear)} aria-label="Assessment year" onChange={() => {}} disabled={!selectedFinancialYear}>
-                <option value="">{selectedFinancialYear ? getAssessmentYear(selectedFinancialYear) : 'Not available'}</option>
-              </select>
-              <ChevronDown className="w-3 h-3" />
-            </div>
-          </div>
-          <div className="portal-filter-pair">
-            <label className="portal-subnav-label">Financial year</label>
-            <div className="portal-select-wrap">
-              <select className="portal-select" value={selectedFinancialYear} aria-label="Financial year" onChange={(event) => setSelectedFinancialYear(event.target.value)} disabled={financialYears.length === 0}>
-                {financialYears.length === 0 && <option value="">Not available</option>}
-                {financialYears.map((year) => <option key={year}>{year}</option>)}
-              </select>
-              <ChevronDown className="w-3 h-3" />
-            </div>
-          </div>
-        </div>
-        <div className="portal-demo-actions">
-          {demoMessage && (
-            <div className="hidden md:flex items-center gap-2 status-success px-3 py-1.5 rounded-md text-xs animate-pulse">
-              <CheckCircle className="w-4 h-4" />
-              {demoMessage}
-            </div>
-          )}
-          <button
-            onClick={handleSeedDemo}
-            disabled={loadingDemo}
-            className="portal-demo-load"
-            title="Load synthetic ABC Manufacturing Pvt Ltd sample dataset for SIH evaluation"
+    
+    {/* Portal Subnav Filter Bar (Similar to ITR e-Filing assessment selector) */}
+    <div className="portal-subnav flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5">
+          <span className="font-bold text-slate-700">Assessment Year (AY):</span>
+          <select 
+            className="itr-select" 
+            value={getAssessmentYear(selectedFinancialYear)} 
+            aria-label="Assessment year" 
+            onChange={() => {}} 
+            disabled={!selectedFinancialYear}
           >
-            {loadingDemo && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-            {loadingDemo ? "Loading Demo..." : "Load Demo Scenario"}
-          </button>
-          <button
-            onClick={handleUnloadDemo}
-            disabled={loadingUnload}
-            className="portal-demo-unload"
-            title="Remove the synthetic ABC Manufacturing demo dataset"
-          >
-            {loadingUnload && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-            {loadingUnload ? "Unloading..." : <><Trash2 className="w-3.5 h-3.5" /> Unload Demo</>}
-          </button>
+            <option value="">{selectedFinancialYear ? getAssessmentYear(selectedFinancialYear) : 'Not Available'}</option>
+          </select>
         </div>
+
+        <div className="flex items-center gap-1.5">
+          <span className="font-bold text-slate-700">Financial Year (FY):</span>
+          <select 
+            className="itr-select" 
+            value={selectedFinancialYear} 
+            aria-label="Financial year" 
+            onChange={(event) => setSelectedFinancialYear(event.target.value)} 
+            disabled={financialYears.length === 0}
+          >
+            {financialYears.length === 0 && <option value="">Not Available</option>}
+            {financialYears.map((year) => <option key={year}>{year}</option>)}
+          </select>
+        </div>
+
+        <span className="text-slate-400">|</span>
+        <span className="text-slate-600">Assessee: <strong>ABC Manufacturing Pvt Ltd</strong> (PAN: AABCA1234F)</span>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        {demoMessage && (
+          <span className="text-positive text-xs">
+            {demoMessage}
+          </span>
+        )}
+        <button
+          onClick={handleSeedDemo}
+          disabled={loadingDemo}
+          className="btn-primary text-xs"
+          title="Import synthetic test ledger for ABC Manufacturing Pvt Ltd"
+        >
+          {loadingDemo && <RefreshCw className="w-3 h-3 animate-spin" />}
+          <span>{loadingDemo ? "Importing..." : "Load Demo Scenario"}</span>
+        </button>
+        <button
+          onClick={handleUnloadDemo}
+          disabled={loadingUnload}
+          className="btn-secondary text-xs"
+          title="Clear the demo scenario records"
+        >
+          {loadingUnload && <RefreshCw className="w-3 h-3 animate-spin" />}
+          <span>{loadingUnload ? "Clearing..." : "Unload Demo"}</span>
+        </button>
       </div>
     </div>
     </>

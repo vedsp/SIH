@@ -1,86 +1,107 @@
 import React from 'react';
-import { GitCompare, CheckCircle2, AlertTriangle, ArrowRight, Layers } from 'lucide-react';
+import { GitCompare, AlertTriangle, CheckCircle2, ShieldCheck, HelpCircle } from 'lucide-react';
 
 export const AnalysisPage = () => {
   return (
-    <div className="space-y-6">
-      <div className="glass-card p-6 rounded-2xl border border-slate-800">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-sky-500/10 text-sky-400">
-            <GitCompare className="w-6 h-6" />
-          </div>
+    <div className="space-y-4">
+      {/* Title & Metadata Banner */}
+      <div className="bg-white border border-[#cccccc] p-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 className="text-xl font-bold text-white">Cross-Document Verification Engine</h2>
-            <p className="text-xs text-slate-400">Inter-document consistency matching between Bank Statements, GST filings, and Invoices</p>
+            <h2 className="text-sm font-bold text-[#222222] uppercase tracking-wide flex items-center gap-1.5">
+              <GitCompare className="w-4 h-4 text-[#0b3861]" />
+              Schedule RC: Cross-Document Inter-Ledger Reconciliation
+            </h2>
+            <p className="text-xs text-[#555555]">
+              Automated reconciliation of Bank Statements vs. GSTR-3B Taxable Turnover vs. Uploaded Invoices
+            </p>
+          </div>
+          <div className="text-xs text-[#555555] font-mono">
+            Status: <span className="text-warning">1 VARIANCE FLAGGED</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Bank vs GST Matching Card */}
-        <div className="glass-card p-6 rounded-2xl border border-amber-500/30 space-y-4 bg-gradient-to-b from-slate-900 to-amber-950/10">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-amber-300 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              Bank Statement vs GST Turnover Mismatch
-            </h3>
-            <span className="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 font-mono">
-              26.3% Discrepancy
-            </span>
-          </div>
-
-          <div className="space-y-3 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Annual Bank Statement Credits:</span>
-              <span className="text-slate-100 font-mono font-bold">₹18,70,000</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Reported GST Annual Turnover:</span>
-              <span className="text-slate-100 font-mono font-bold">₹14,80,000</span>
-            </div>
-            <div className="flex justify-between py-1.5">
-              <span className="text-slate-400">Unexplained Variance:</span>
-              <span className="text-amber-400 font-mono font-bold">+₹3,90,000</span>
-            </div>
-          </div>
-
-          <div className="p-3 bg-slate-900/80 border border-slate-800 rounded-xl text-xs text-slate-300 leading-relaxed">
-            <span className="font-semibold text-amber-300">Responsible AI Context:</span> Potential inconsistency identified. Bank credits exceed GST turnover by ₹3.90 Lakh. Requires human review (e.g. check for non-taxable receipts, loans, or under-reporting).
-          </div>
+      {/* Primary Reconciliation Table */}
+      <div className="bg-white border border-[#cccccc]">
+        <div className="bg-[#f2f4f7] px-3 py-2 border-b border-[#cccccc] flex items-center justify-between">
+          <span className="text-xs font-bold text-[#222222] uppercase tracking-wide">
+            Table 1: Turnover & Revenue Reconciliation Summary (AY 2026-27)
+          </span>
+          <span className="text-[11px] text-[#555555]">All figures in INR (₹)</span>
         </div>
-
-        {/* GST vs Invoices Matching Card */}
-        <div className="glass-card p-6 rounded-2xl border border-emerald-500/30 space-y-4 bg-gradient-to-b from-slate-900 to-emerald-950/10">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              GST Return vs Issued Invoices
-            </h3>
-            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
-              Consistent Match
-            </span>
-          </div>
-
-          <div className="space-y-3 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Declared Taxable Amount:</span>
-              <span className="text-slate-100 font-mono font-bold">₹14,80,000</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Verified Invoice Totals:</span>
-              <span className="text-slate-100 font-mono font-bold">₹16,20,000</span>
-            </div>
-            <div className="flex justify-between py-1.5">
-              <span className="text-slate-400">Match Status:</span>
-              <span className="text-emerald-400 font-mono font-bold">Verified within 10% tolerance</span>
-            </div>
-          </div>
-
-          <div className="p-3 bg-slate-900/80 border border-slate-800 rounded-xl text-xs text-slate-300 leading-relaxed">
-            Invoice totals match GSTR-3B monthly filings closely across Q1-Q4.
-          </div>
+        <div className="overflow-x-auto">
+          <table className="itr-grid">
+            <thead>
+              <tr>
+                <th style={{ width: '40px' }}>Sr.</th>
+                <th>Reconciliation Stream / Heads</th>
+                <th>Source Primary Document</th>
+                <th>Declared / Computed Amount (₹)</th>
+                <th>Benchmark / Control Figure (₹)</th>
+                <th>Variance (₹)</th>
+                <th>Assessment & Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="text-center font-mono">1</td>
+                <td className="font-semibold text-[#111111]">Bank Inflows vs. Reported GST Turnover</td>
+                <td>HDFC Bank Statement (Annual Credits) vs. GSTR-3B</td>
+                <td className="text-right font-mono">18,70,000.00</td>
+                <td className="text-right font-mono">14,80,000.00</td>
+                <td className="text-right font-mono text-warning font-bold">+3,90,000.00 (26.3%)</td>
+                <td>
+                  <span className="text-warning font-bold flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5 inline text-[#b45309]" />
+                    Variance Flagged: Bank credits exceed GST turnover by ₹3.90L. Verify non-taxable receipts / capital inflows.
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td className="text-center font-mono">2</td>
+                <td className="font-semibold text-[#111111]">GSTR-3B Turnover vs. Issued Invoices Total</td>
+                <td>GSTR-3B Monthly Filings vs. Verified Invoice Set</td>
+                <td className="text-right font-mono">14,80,000.00</td>
+                <td className="text-right font-mono">16,20,000.00</td>
+                <td className="text-right font-mono text-positive">-1,40,000.00 (8.6%)</td>
+                <td>
+                  <span className="text-positive font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 inline text-[#15803d]" />
+                    Consistent Match within statutory 10% variance tolerance threshold.
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td className="text-center font-mono">3</td>
+                <td className="font-semibold text-[#111111]">TDS 26AS Deductions vs. Bank Receipts</td>
+                <td>Form 26AS Tax Deducted at Source vs. Bank Inward RTGS</td>
+                <td className="text-right font-mono">1,87,000.00</td>
+                <td className="text-right font-mono">1,87,000.00</td>
+                <td className="text-right font-mono text-positive">0.00 (0.0%)</td>
+                <td>
+                  <span className="text-positive font-bold flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 inline text-[#15803d]" />
+                    Fully Reconciled with TRACES 26AS central tax ledger.
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
+
+      {/* Statutory Auditor Note / Notice Box */}
+      <div className="bg-white border border-[#cccccc] p-3 text-xs space-y-2">
+        <div className="font-bold text-[#0b3861] uppercase flex items-center gap-1">
+          <HelpCircle className="w-3.5 h-3.5" />
+          Auditor Verification Guidance & Action Item (Under Rule 114E / Section 142(1)):
+        </div>
+        <p className="text-[#333333] leading-relaxed">
+          Where bank deposits/credits exceed declared GST taxable sales by more than 15%, the taxpayer should maintain a reconciliation statement distinguishing between taxable turnover, exempt supplies, capital contributions, and loan receipts to prevent automated notice generation under Section 148A.
+        </p>
       </div>
     </div>
   );
 };
+

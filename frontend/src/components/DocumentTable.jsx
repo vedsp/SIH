@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Trash2, Eye, AlertCircle, FileCode, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 
 export const DocumentTable = ({ documents, onViewDetail, onDeleteDocument, loading }) => {
   const [deleteId, setDeleteId] = useState(null);
@@ -7,31 +7,32 @@ export const DocumentTable = ({ documents, onViewDetail, onDeleteDocument, loadi
 
   const getCategoryLabel = (category) => {
     const labels = {
-      BANK_STATEMENT: 'Bank Statement', GST_RETURN: 'GST Return', INVOICE: 'Invoice', ITR: 'ITR Document',
-      BALANCE_SHEET: 'Balance Sheet', PROFIT_LOSS: 'Profit & Loss', OTHER: 'Other',
+      BANK_STATEMENT: 'Bank Statement', 
+      GST_RETURN: 'GSTR-3B Return', 
+      INVOICE: 'Tax Invoice', 
+      ITR: 'ITR-6 Return',
+      BALANCE_SHEET: 'Balance Sheet', 
+      PROFIT_LOSS: 'P&L Statement', 
+      OTHER: 'General Record',
     };
-    return labels[category] || 'Other';
+    return labels[category] || 'General Record';
   };
 
-  const getCategoryBadge = (category) => {
-    return (
-      <span className="status-label status-neutral">
-        {getCategoryLabel(category)}
-      </span>
-    );
+  const getVerificationText = (doc) => {
+    if (doc.status === 'COMPLETED') return <span className="text-positive">Verified</span>;
+    if (doc.status === 'FAILED') return <span className="text-negative">Flagged Exception</span>;
+    if (doc.status === 'EXTRACTED') return <span className="text-neutral">Extracted</span>;
+    return <span className="text-warning">Under Review</span>;
   };
 
-  const getVerification = (doc) => {
-    if (doc.status === 'COMPLETED') return ['VERIFIED', 'status-success'];
-    if (doc.status === 'FAILED') return ['FLAGGED', 'status-critical'];
-    if (doc.status === 'EXTRACTED') return ['EXTRACTED', 'status-info'];
-    return ['UNDER REVIEW', 'status-warning'];
-  };
-
-  const getRisk = (doc) => {
-    if (doc.status === 'FAILED' || doc.original_name.toLowerCase().includes('duplicate')) return ['HIGH', 'risk-high'];
-    if (doc.status === 'PROCESSING' || doc.status === 'UPLOADED') return ['MEDIUM', 'risk-medium'];
-    return ['LOW', 'risk-low'];
+  const getRiskText = (doc) => {
+    if (doc.status === 'FAILED' || doc.original_name.toLowerCase().includes('duplicate')) {
+      return <span className="text-negative font-bold">High</span>;
+    }
+    if (doc.status === 'PROCESSING' || doc.status === 'UPLOADED') {
+      return <span className="text-warning font-bold">Medium</span>;
+    }
+    return <span className="text-positive font-bold">Low</span>;
   };
 
   const formatDate = (value) => new Date(value).toLocaleDateString('en-GB', {
@@ -39,144 +40,126 @@ export const DocumentTable = ({ documents, onViewDetail, onDeleteDocument, loadi
   });
 
   const getTaxCategory = (category) => {
-    if (category === 'GST_RETURN') return 'GST Compliance';
-    if (category === 'INVOICE') return 'Business Transaction';
+    if (category === 'GST_RETURN') return 'Indirect Tax (GST)';
+    if (category === 'INVOICE') return 'Commercial Trade';
     if (category === 'ITR') return 'Direct Tax';
-    if (category === 'BANK_STATEMENT') return 'Financial Evidence';
+    if (category === 'BANK_STATEMENT') return 'Cash Flow Verification';
     return 'Financial Record';
-  };
-
-  const getStatusBadge = (doc) => {
-    const [label, style] = getVerification(doc);
-    return (
-      <span className={`status-label ${style}`}>
-        {label}
-      </span>
-    );
   };
 
   if (loading) {
     return (
-      <div className="register-empty">
-        <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-sm text-slate-400 mt-3">Loading document repository...</p>
+      <div className="p-4 text-center text-xs text-[#666666]">
+        Loading evidence register records...
       </div>
     );
   }
 
   if (!documents || documents.length === 0) {
     return (
-      <div className="register-empty border-dashed">
-        <FileCode className="w-12 h-12 text-slate-600 mx-auto" />
-        <h4 className="text-base font-semibold text-slate-300 mt-3">No Documents Uploaded</h4>
-        <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-          Upload your financial documents (Bank Statements, GST Returns, Invoices) or click "Load Demo Scenario" at the top right for an instant test run.
-        </p>
+      <div className="p-3 bg-[#f9fafb] border border-[#dddddd] text-xs text-[#555555]">
+        No evidence documents uploaded. Click <strong>+ Upload Document</strong> or <strong>Load Demo Scenario</strong> to import records.
       </div>
     );
   }
 
   return (
-    <div className="register-table-wrap">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[1080px] text-left text-xs text-[#435363]">
-          <thead className="bg-[#eef3f6] text-[10px] font-semibold text-[#526676] uppercase tracking-wider border-b border-[#cfd9df]">
-            <tr>
-              <th className="px-4 py-3">Document</th>
-              <th className="px-4 py-3">Financial year</th>
-              <th className="px-4 py-3">Document type</th>
-              <th className="px-4 py-3">Tax category</th>
-              <th className="px-4 py-3">Verification</th>
-              <th className="px-4 py-3">Risk level</th>
-              <th className="px-4 py-3">Size</th>
-              <th className="px-4 py-3">Upload date</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+    <div className="overflow-x-auto">
+      <table className="itr-grid">
+        <thead>
+          <tr>
+            <th className="w-12 text-center">Sr. No.</th>
+            <th>Document Name / Reference</th>
+            <th>Financial Period</th>
+            <th>Form / Type</th>
+            <th>Audit Category</th>
+            <th>Verification Status</th>
+            <th>Risk</th>
+            <th className="text-right">File Size</th>
+            <th>Date Uploaded</th>
+            <th className="text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {documents.map((doc, idx) => (
+            <React.Fragment key={doc.id}>
+            <tr className="hover:bg-[#f9fafb]">
+              <td className="text-center font-mono text-[#555555]">{idx + 1}</td>
+              <td>
+                <div className="font-semibold text-[#111111]">{doc.original_name}</div>
+                <div className="text-[11px] text-[#666666] font-mono">
+                  REF: DOC-{String(doc.id).padStart(5, '0')} · {doc.file_type.toUpperCase()} · {doc.page_count} page(s)
+                </div>
+              </td>
+              <td className="font-mono text-xs">FY 2025-26</td>
+              <td className="font-medium text-[#222222]">
+                {getCategoryLabel(doc.document_category)}
+              </td>
+              <td className="text-[#555555]">{getTaxCategory(doc.document_category)}</td>
+              <td>{getVerificationText(doc)}</td>
+              <td>{getRiskText(doc)}</td>
+              <td className="text-right font-mono text-[#555555]">
+                {(doc.file_size / 1024).toFixed(1)} KB
+              </td>
+              <td className="text-[#555555]">
+                {formatDate(doc.created_at)}
+              </td>
+              <td className="text-right">
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => onViewDetail(doc.id)}
+                    className="itr-action-btn"
+                    title="View Extraction Details"
+                  >
+                    View
+                  </button>
+                  {doc.original_name.toLowerCase().includes('duplicate') && (
+                    <button
+                      onClick={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
+                      className="itr-action-btn text-[#b45309]"
+                      title="Toggle Audit Note"
+                    >
+                      {expandedId === doc.id ? 'Hide Note' : 'Audit Note'}
+                    </button>
+                  )}
+                  <span className="text-[#cccccc]">|</span>
+                  <button
+                    onClick={() => setDeleteId(doc.id)}
+                    className="itr-action-delete"
+                    title="Delete Record"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-[#e1e7eb]">
-            {documents.map((doc) => (
-              <React.Fragment key={doc.id}>
-              <tr className="hover:bg-[#f7fafb] transition">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-sm bg-[#edf3f5] border border-[#cfd9df] text-[#2d6f91] shrink-0">
-                      <FileText className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-[#183247] truncate max-w-[260px]">{doc.original_name}</div>
-                      <div className="text-[10px] text-[#7b8a96] font-mono">DOC-{String(doc.id).padStart(5, '0')} · {doc.file_type.toUpperCase()} · {doc.page_count} page(s)</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 font-mono text-[#526676]">FY 2025-26</td>
-                <td className="px-4 py-3">
-                  {getCategoryBadge(doc.document_category)}
-                </td>
-                <td className="px-4 py-3 text-[#526676]">{getTaxCategory(doc.document_category)}</td>
-                <td className="px-4 py-3">{getStatusBadge(doc)}</td>
-                <td className="px-4 py-3"><span className={`risk-label ${getRisk(doc)[1]}`}><span>●</span> {getRisk(doc)[0]}</span></td>
-                <td className="px-4 py-3 font-mono text-[#687887]">
-                  {(doc.file_size / 1024).toFixed(1)} KB
-                </td>
-                <td className="px-4 py-3 text-[#687887]">
-                  {formatDate(doc.created_at)}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => onViewDetail(doc.id)}
-                      className="table-action table-action-view"
-                      title="View Details & Extracted Data"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    {getRisk(doc)[0] === 'HIGH' && (
-                      <button
-                        onClick={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
-                        className="table-action table-action-view"
-                        title="View review note"
-                      >
-                        {expandedId === doc.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setDeleteId(doc.id)}
-                      className="table-action table-action-delete"
-                      title="Delete Document"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+            {expandedId === doc.id && (
+              <tr className="bg-[#fffbf0]">
+                <td colSpan="10" className="p-2 text-xs text-[#8a4200]">
+                  <strong>Auditor's Discrepancy Note:</strong> Suspected duplicate invoice matching INV-1032. Requires physical verification of vendor tax invoice and e-way bill before ITC claiming.
                 </td>
               </tr>
-              {expandedId === doc.id && (
-                <tr className="bg-[#fffaf0]">
-                  <td colSpan="9" className="px-4 py-2.5 text-[11px] text-[#765a2b] border-t border-[#ead9b8]">
-                    <strong>Review note:</strong> Potential duplicate or inconsistent evidence detected. Confirm invoice number, vendor, amount, and related filings before verification.
-                  </td>
-                </tr>
-              )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            )}
+            </React.Fragment>
+          ))}
+        </tbody>
+      </table>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal (Standard Government Dialog) */}
       {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-white border border-[#cfd9df] p-6 rounded-md max-w-md w-full space-y-4 shadow-xl">
-            <div className="flex items-center gap-3 text-rose-400">
-              <AlertCircle className="w-6 h-6 shrink-0" />
-              <h4 className="text-base font-semibold text-[#183247]">Delete Document</h4>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white border border-[#999999] p-4 max-w-sm w-full space-y-3 shadow-md">
+            <div className="flex items-center gap-2 text-[#b91c1c] font-bold text-sm">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>Confirm Deletion</span>
             </div>
-            <p className="text-xs text-slate-400">
-              Are you sure you want to delete this document? This will permanently remove the storage file and all extracted financial entities.
+            <p className="text-xs text-[#333333] leading-relaxed">
+              Are you sure you want to permanently delete this document record and its associated extracted ledger entries from the working papers?
             </p>
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#eeeeee]">
               <button
                 onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white transition"
+                className="btn-secondary text-xs"
               >
                 Cancel
               </button>
@@ -185,7 +168,7 @@ export const DocumentTable = ({ documents, onViewDetail, onDeleteDocument, loadi
                   onDeleteDocument(deleteId);
                   setDeleteId(null);
                 }}
-                className="px-4 py-2 bg-[#a34d42] hover:bg-[#873d35] text-white text-xs font-semibold rounded-md transition"
+                className="btn-primary bg-[#b91c1c] border-[#991b1b] hover:bg-[#991b1b] text-xs"
               >
                 Confirm Delete
               </button>

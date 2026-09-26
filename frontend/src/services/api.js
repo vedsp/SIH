@@ -68,8 +68,11 @@ export const documentApi = {
   },
   getDetail: (id) => apiFetch(`/documents/${id}`),
   delete: (id) => apiFetch(`/documents/${id}`, { method: 'DELETE' }),
-  getDashboardOverview: () => apiFetch('/documents/dashboard/overview')
+  getDashboardOverview: () => apiFetch('/documents/dashboard/overview'),
+  getRiskAssessment: () => apiFetch('/documents/risk/assessment'),
+  getAnomalies: () => apiFetch('/documents/anomalies/list')
 };
+
 
 export const demoApi = {
   seedDemo: () => apiFetch('/demo/seed', { method: 'POST' }),

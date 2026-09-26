@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { documentApi } from '../services/api';
 import { DocumentTable } from '../components/DocumentTable';
-import { FileCheck2, UploadCloud, Search, Filter, RotateCcw } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export const DocumentsPage = ({ onOpenUpload, onViewDetail, refreshTrigger, initialCategory = '' }) => {
   const [documents, setDocuments] = useState([]);
@@ -44,104 +44,96 @@ export const DocumentsPage = ({ onOpenUpload, onViewDetail, refreshTrigger, init
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-[#cfd9df] pb-4">
+    <div className="space-y-3">
+      {/* Top Header */}
+      <div className="itr-card bg-white p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <div className="audit-kicker">Document management / evidence register</div>
-          <h2 className="text-2xl font-bold text-[#183247] tracking-tight flex items-center gap-2 mt-1">
-            <FileCheck2 className="w-5 h-5 text-[#2d6f91]" />
-            Financial Evidence Repository
+          <h2 className="text-sm font-bold text-[#111111]">
+            Document Ingestion & Financial Evidence Register
           </h2>
-          <p className="text-xs text-[#687887] mt-1">
-            Centralized review, classification, and verification of taxpayer financial documents.
-          </p>
+          <div className="text-xs text-[#555555]">
+            Assessee: ABC Manufacturing Pvt Ltd (PAN: AABCA1234F) · AY 2026-27
+          </div>
         </div>
         <button
           onClick={onOpenUpload}
-          className="flex items-center justify-center gap-2 bg-[#183247] hover:bg-[#24465e] text-white text-xs font-semibold px-4 py-2.5 rounded-md transition"
+          className="btn-primary text-xs"
         >
-          <UploadCloud className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Upload Document</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 border border-[#d5dfe4] bg-white">
-        {[
-          ['Total documents', documents.length, 'text-[#183247]'],
-          ['Verified', verifiedCount, 'text-[#2f6f5e]'],
-          ['Under review', reviewCount, 'text-[#87621b]'],
-          ['Risk flags', flaggedCount, 'text-[#a34d42]'],
-          ['Assessment year', 'AY 2026-27', 'text-[#183247]'],
-        ].map(([label, value, color], index) => (
-          <div key={label} className={`px-4 py-3 ${index > 0 ? 'border-l border-[#d5dfe4]' : ''}`}>
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-[#718290]">{label}</div>
-            <div className={`mt-1 text-lg font-bold ${color}`}>{value}</div>
+      {/* Summary Strip (ITR Schedule Breakdown) */}
+      <div className="itr-card bg-white p-2.5">
+        <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-[#dddddd] text-xs">
+          <div className="px-2.5">
+            <div className="text-[#666666]">Total Ingested:</div>
+            <div className="font-bold text-[#111111] font-mono text-sm">{documents.length} Records</div>
           </div>
-        ))}
+          <div className="px-2.5">
+            <div className="text-[#666666]">Verified Clean:</div>
+            <div className="font-bold text-positive font-mono text-sm">{verifiedCount} Records</div>
+          </div>
+          <div className="px-2.5">
+            <div className="text-[#666666]">Under Review:</div>
+            <div className="font-bold text-warning font-mono text-sm">{reviewCount} Records</div>
+          </div>
+          <div className="px-2.5">
+            <div className="text-[#666666]">Exceptions / Flagged:</div>
+            <div className="font-bold text-negative font-mono text-sm">{flaggedCount} Records</div>
+          </div>
+          <div className="px-2.5">
+            <div className="text-[#666666]">Assessment Period:</div>
+            <div className="font-bold text-[#111111] font-mono text-sm">AY 2026-27</div>
+          </div>
+        </div>
       </div>
 
-      <div className="border border-[#d5dfe4] bg-white p-3">
-        <div className="flex items-center gap-2 mb-3 text-[10px] uppercase tracking-wider font-semibold text-[#526676]">
-          <Filter className="w-3.5 h-3.5 text-[#2d6f91]" />
-          Register filters
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
-          <select className="portal-filter" defaultValue="AY 2026-27" aria-label="Assessment year">
-            <option>AY 2026-27</option>
-            <option>AY 2025-26</option>
+      {/* Filter Toolbar */}
+      <div className="itr-card bg-white p-2.5 space-y-2">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-bold text-slate-700">Filter Register:</span>
+          <select className="itr-select" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} aria-label="Document type">
+            <option value="">All Document Forms</option>
+            <option value="BANK_STATEMENT">Bank Statements</option>
+            <option value="GST_RETURN">GSTR-3B Returns</option>
+            <option value="INVOICE">Tax Invoices</option>
+            <option value="ITR">Income Tax Returns</option>
           </select>
-          <select className="portal-filter" defaultValue="FY 2025-26" aria-label="Financial year">
-            <option>FY 2025-26</option>
-            <option>FY 2024-25</option>
-          </select>
-          <select className="portal-filter" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} aria-label="Document type">
-            <option value="">All document types</option>
-            <option value="BANK_STATEMENT">Bank statements</option>
-            <option value="GST_RETURN">GST returns</option>
-            <option value="INVOICE">Invoices</option>
-            <option value="ITR">ITR documents</option>
-          </select>
-          <select className="portal-filter" defaultValue="" aria-label="Verification status">
-            <option value="">Verification status</option>
-            <option>Verified</option>
-            <option>Under review</option>
-            <option>Flagged</option>
-          </select>
-          <select className="portal-filter" defaultValue="" aria-label="Risk level">
-            <option value="">Risk level</option>
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-          </select>
-          <div className="relative lg:col-span-1">
-            <Search className="w-3.5 h-3.5 text-[#718290] absolute left-2.5 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search name, PAN, reference..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="portal-filter w-full pl-8"
-            />
-          </div>
-        </div>
-        <div className="flex items-center justify-end gap-3 mt-3">
-          <button onClick={clearFilters} className="flex items-center gap-1.5 text-[10px] font-semibold tracking-wider text-[#526676] hover:text-[#183247] uppercase">
-            <RotateCcw className="w-3 h-3" /> Clear filters
-          </button>
-          <span className="text-[11px] text-[#8a99a4]">Showing {filteredDocs.length} of {documents.length} records</span>
+
+          <input
+            type="text"
+            placeholder="Search by filename or reference..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="itr-input flex-1 min-w-[200px]"
+          />
+
+          {(searchTerm || categoryFilter) && (
+            <button onClick={clearFilters} className="itr-action-btn text-xs">
+              Clear Filter
+            </button>
+          )}
+
+          <span className="text-xs text-[#666666] ml-auto">
+            Showing {filteredDocs.length} of {documents.length} evidence records
+          </span>
         </div>
       </div>
 
       {/* Table */}
-      <DocumentTable
-        documents={filteredDocs}
-        loading={loading}
-        onViewDetail={onViewDetail}
-        onDeleteDocument={async (id) => {
-          await documentApi.delete(id);
-          fetchDocuments();
-        }}
-      />
+      <div className="itr-card bg-white p-3 space-y-2">
+        <DocumentTable
+          documents={filteredDocs}
+          loading={loading}
+          onViewDetail={onViewDetail}
+          onDeleteDocument={async (id) => {
+            await documentApi.delete(id);
+            fetchDocuments();
+          }}
+        />
+      </div>
     </div>
   );
 };

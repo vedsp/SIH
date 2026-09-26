@@ -27,8 +27,8 @@ const AppContent = () => {
     return (
         <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
         <div className="text-center space-y-3">
-          <div className="w-10 h-10 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-xs text-slate-400 font-mono">Initializing FinDocAI Environment...</p>
+          <div className="w-8 h-8 border-2 border-[#7a1c2d] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-xs text-slate-500 font-mono">Initializing FinDocAI Audit Workstation...</p>
         </div>
       </div>
     );
