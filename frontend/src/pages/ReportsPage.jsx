@@ -27,7 +27,7 @@ export const ReportsPage = () => {
     const hasData = overview && overview.documents_processed > 0;
     const docs = overview?.recent_documents ?? [];
     
-    let legalName = 'Unknown Entity', pan = '—', ay = 'Not Available';
+    let legalName = overview?.assessee_name || '—', pan = overview?.assessee_pan || '—', ay = 'Not Available';
     let totalCredits = 0, gstTurnover = 0, riskScore = 0, riskLevel = 'UNKNOWN';
     let variance = 0;
     let highValueAnomaly = null;
@@ -35,13 +35,17 @@ export const ReportsPage = () => {
     if (hasData) {
       const allNames = docs.map(d => (d.original_name || d.filename || '').toLowerCase()).join(' ');
       
-      const panMatch = allNames.match(/\b([a-z]{5}[0-9]{4}[a-z])\b/i);
-      if (panMatch) pan = panMatch[1].toUpperCase();
+      if (pan === '—') {
+        const panMatch = allNames.match(/\b([a-z]{5}[0-9]{4}[a-z])\b/i);
+        if (panMatch) pan = panMatch[1].toUpperCase();
+      }
 
-      if (allNames.includes('abc') || allNames.includes('manufacturing')) {
-        legalName = 'ABC Manufacturing Pvt Ltd';
-      } else if (docs.length > 0) {
-        legalName = (docs[0].original_name || docs[0].filename || '').replace(/\.[^.]+$/, '').replace(/[_\-]/g, ' ').trim() || 'Unknown Entity';
+      if (legalName === '—') {
+        if (allNames.includes('abc') || allNames.includes('manufacturing')) {
+          legalName = 'ABC Manufacturing Pvt Ltd';
+        } else if (docs.length > 0) {
+          legalName = (docs[0].original_name || docs[0].filename || '').replace(/\.[^.]+$/, '').replace(/[_\-]/g, ' ').trim() || 'Unknown Entity';
+        }
       }
 
       if (docs.length > 0) {

@@ -100,23 +100,32 @@ export const DashboardPage = ({ onNavigate, onOpenUpload, onViewDetail, refreshT
 
         // Derive assessee identity from document filenames (heuristic matching)
         const allNames = docs.map(d => (d.original_name || d.filename || '').toLowerCase()).join(' ');
-        let legalName = '—', pan = '—', gstin = '—', filingStatus = null;
+        let legalName = overview.assessee_name || '—';
+        let pan = overview.assessee_pan || '—';
+        let gstin = overview.assessee_gstin || '—';
+        let filingStatus = null;
 
         if (hasData) {
-          // PAN: 10-char AAAAA9999A pattern
-          const panMatch = allNames.match(/\b([a-z]{5}[0-9]{4}[a-z])\b/i);
-          if (panMatch) pan = panMatch[1].toUpperCase();
+          // PAN fallback: 10-char AAAAA9999A pattern
+          if (pan === '—') {
+            const panMatch = allNames.match(/\b([a-z]{5}[0-9]{4}[a-z])\b/i);
+            if (panMatch) pan = panMatch[1].toUpperCase();
+          }
 
-          // GSTIN: 15-char format (2-digit state + PAN + suffix)
-          const gstMatch = allNames.match(/\b(\d{2}[a-z]{5}[0-9]{4}[a-z][a-z0-9]{3})\b/i);
-          if (gstMatch) gstin = gstMatch[1].toUpperCase();
+          // GSTIN fallback: 15-char format (2-digit state + PAN + suffix)
+          if (gstin === '—') {
+            const gstMatch = allNames.match(/\b(\d{2}[a-z]{5}[0-9]{4}[a-z][a-z0-9]{3})\b/i);
+            if (gstMatch) gstin = gstMatch[1].toUpperCase();
+          }
 
-          // Legal name: from filename keywords, else cleaned first-doc name
-          if (allNames.includes('abc') || allNames.includes('manufacturing')) {
-            legalName = 'ABC Manufacturing Pvt Ltd';
-          } else {
-            const raw = docs[0]?.original_name || docs[0]?.filename || '';
-            legalName = raw.replace(/\.[^.]+$/, '').replace(/[_\-]/g, ' ').trim() || 'Unknown Entity';
+          // Legal name fallback
+          if (legalName === '—') {
+            if (allNames.includes('abc') || allNames.includes('manufacturing')) {
+              legalName = 'ABC Manufacturing Pvt Ltd';
+            } else {
+              const raw = docs[0]?.original_name || docs[0]?.filename || '';
+              legalName = raw.replace(/\.[^.]+$/, '').replace(/[_\-]/g, ' ').trim() || 'Unknown Entity';
+            }
           }
 
           // Filing status: derive from document verification statuses
