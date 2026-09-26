@@ -19,3 +19,4 @@ psycopg[binary]>=3.1.0     # PostgreSQL adapter (pre-built wheels, no C++ tools 
 supabase
 httpx
 reportlab
+email-validator==2.1.1
